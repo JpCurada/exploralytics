@@ -1,7 +1,7 @@
 virt/
-exploralytics\visualize\__pycache__\
-exploralytics\tests\__pycache__\
-exploralytics\__pycache__\
+exploralytics/visualize/__pycache__/
+exploralytics/tests/__pycache__/
+exploralytics/__pycache__/
 .coverage
 .vscode/
 .pytest_cache/
