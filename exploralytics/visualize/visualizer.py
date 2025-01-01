@@ -38,21 +38,6 @@ class Visualizer:
         height: Default height for plots in pixels
         width: Default width for plots in pixels
         style: Dictionary of plot styling settings
-
-    Examples:
-        >>> import pandas as pd
-        >>> from exploralytics.visualize import Visualizer
-        >>> 
-        >>> # Create sample data
-        >>> df = pd.DataFrame({
-        ...     'A': [1, 2, 3],
-        ...     'B': [4, 5, 6]
-        ... })
-        >>> 
-        >>> # Initialize visualizer and create plot
-        >>> viz = Visualizer()
-        >>> fig = viz.plot_histograms(df, title='Data Distribution')
-        >>> fig.show()
     """
 
     def __init__(
@@ -62,19 +47,7 @@ class Visualizer:
         width: int = 800,
         style: Optional[Dict] = None
     ):
-        """
-        Initialize the visualization tool.
-
-        Args:
-            color: Main color for plots (default: '#94C973')
-            height: Default plot height in pixels (default: 600)
-            width: Default plot width in pixels (default: 800)
-            style: Custom style settings (default: None, uses default style)
-
-        Raises:
-            ValueError: If provided color is not a valid hex code
-        """
-        # Validate color format
+        """Initialize the visualization tool."""
         if not validate_color(color):
             raise ValueError(
                 "Color must be a valid hex code (e.g., '#94C973')"
@@ -85,104 +58,183 @@ class Visualizer:
         self.width = width
         self.style = style or DEFAULT_STYLE.copy()
 
-    def plot_distributions(
+    def plot_histograms(
         self,
         data: pd.DataFrame,
         title: str,
-        subtitle: str = '',
-        columns: Optional[List[str]] = None,
-        layout: Optional[Dict] = None
+        columns: List[str] = [],
+        num_cols: int = 1,
+        subtitle: str = ' '
     ) -> go.Figure:
-        """
-        Create distribution plots for numerical columns.
+        """Create histogram plots for numerical columns."""
+        if len(columns) >= 1:
+            numerical_columns = data.select_dtypes(
+                include=np.number
+            ).columns.tolist()
+            plot_height = (len(numerical_columns) * 400) / num_cols
+        else:
+            numerical_columns = data.select_dtypes(
+                include=np.number
+            ).columns.tolist()
+            plot_height = (len(numerical_columns) * 400) / num_cols
 
-        Combines histograms, box plots, and density curves for comprehensive
-        distribution analysis.
+        num_rows = (len(numerical_columns) + num_cols - 1) // num_cols
 
-        Args:
-            data: DataFrame containing the data to plot
-            title: Main title for the plot
-            subtitle: Additional text below title (default: '')
-            columns: Specific columns to plot (default: None, uses all numeric)
-            layout: Custom layout settings (default: None)
-
-        Returns:
-            Plotly figure object containing distribution plots
-
-        Raises:
-            ValueError: If data is empty or no numeric columns found
-
-        Examples:
-            >>> viz = Visualizer()
-            >>> fig = viz.plot_distributions(
-            ...     df,
-            ...     title='Feature Distributions',
-            ...     subtitle='Dataset Overview'
-            ... )
-            >>> fig.show()
-        """
-        # Validate input data
-        check_data(data)
-        number_cols = get_number_columns(data, columns)
-        
-        # Get optimal layout
-        n_rows, n_cols = identify_plot_layout(len(number_cols))
-        
-        # Calculate dimensions
-        total_height = n_rows * 300  # 300px per row
-        
-        # Create subplot figure
         fig = make_subplots(
-            rows=n_rows,
-            cols=n_cols,
-            subplot_titles=number_cols,
-            vertical_spacing=0.1
+            rows=num_rows,
+            cols=num_cols,
+            subplot_titles=numerical_columns
         )
-        
-        # Add plots for each column
-        for idx, col_name in enumerate(number_cols):
-            row = (idx // n_cols) + 1
-            col = (idx % n_cols) + 1
-            
-            # Add histogram
-            hist_values, hist_bins = np.histogram(
-                data[col_name].dropna(),
-                bins=suggest_bin_count(data[col_name])
-            )
-            
+
+        for index, col_name in enumerate(numerical_columns):
+            row = index // num_cols + 1
+            col = index % num_cols + 1
+
             fig.add_trace(
                 go.Histogram(
                     x=data[col_name],
-                    name=f'{col_name} (Histogram)',
-                    marker_color=self.color,
-                    opacity=0.7,
-                    showlegend=False
+                    autobinx=True,
+                    name=col_name,
+                    marker_color=self.color
                 ),
                 row=row,
                 col=col
             )
-            
-            # Add box plot
+
+        fig.update_annotations(font_size=12)
+        fig.update_layout(
+            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            showlegend=False,
+            height=plot_height,
+            title_x=0.5
+        )
+
+        return fig
+
+    def plot_boxplots(
+        self,
+        data: pd.DataFrame,
+        title: str,
+        columns: List[str] = [],
+        num_cols: int = 1,
+        subtitle: str = ' '
+    ) -> go.Figure:
+        """Create box plots for numerical columns."""
+        if len(columns) >= 1:
+            numerical_columns = [
+                col for col in columns 
+                if data[col].dtype in ['int64', 'float64']
+            ]
+            plot_height = (len(numerical_columns) * 400) / num_cols
+        else:
+            numerical_columns = data.select_dtypes(
+                include=np.number
+            ).columns.tolist()
+            plot_height = (len(numerical_columns) * 400) / num_cols
+
+        num_rows = (len(numerical_columns) + num_cols - 1) // num_cols
+
+        fig = make_subplots(
+            rows=num_rows,
+            cols=num_cols,
+            subplot_titles=numerical_columns
+        )
+
+        for index, col_name in enumerate(numerical_columns):
+            row = index // num_cols + 1
+            col = index % num_cols + 1
+
             fig.add_trace(
                 go.Box(
-                    x=data[col_name],
-                    name=f'{col_name} (Box)',
-                    marker_color=self.color,
-                    boxpoints='outliers',
-                    orientation='h',
-                    showlegend=False
+                    y=data[col_name],
+                    name=col_name,
+                    marker_color=self.color
                 ),
                 row=row,
                 col=col
             )
-        
-        # Update layout
-        title_text = f"{title}<br><sup>{subtitle}</sup>" if subtitle else title
-        
-        return apply_style(
-            fig=fig,
-            title=title_text,
-            style=self.style,
-            height=total_height,
-            width=self.width
+
+        fig.update_annotations(font_size=12)
+        fig.update_layout(
+            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            showlegend=False,
+            height=plot_height,
+            title_x=0.5
         )
+
+        return fig
+
+    def plot_correlation(
+        self,
+        data: pd.DataFrame,
+        title: str,
+        columns: List[str] = [],
+        subtitle: str = ' '
+    ) -> go.Figure:
+        """Create correlation heatmap."""
+        if len(columns) >= 1:
+            numerical_columns = [
+                col for col in columns 
+                if data[col].dtype in ['int64', 'float64']
+            ]
+        else:
+            numerical_columns = data.select_dtypes(
+                include=np.number
+            ).columns.tolist()
+
+        correlation = data[numerical_columns].corr()
+
+        fig = go.Figure(data=go.Heatmap(
+            z=correlation,
+            x=numerical_columns,
+            y=numerical_columns,
+            colorscale='RdBu',
+            zmin=-1,
+            zmax=1
+        ))
+
+        fig.update_layout(
+            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            height=700,
+            width=700,
+            title_x=0.5
+        )
+
+        return fig
+
+    def plot_scatter_matrix(
+        self,
+        data: pd.DataFrame,
+        title: str,
+        columns: List[str] = [],
+        subtitle: str = ' '
+    ) -> go.Figure:
+        """Create scatter plot matrix."""
+        if len(columns) >= 1:
+            numerical_columns = [
+                col for col in columns 
+                if data[col].dtype in ['int64', 'float64']
+            ]
+        else:
+            numerical_columns = data.select_dtypes(
+                include=np.number
+            ).columns.tolist()
+
+        fig = px.scatter_matrix(
+            data,
+            dimensions=numerical_columns,
+            color_discrete_sequence=[self.color]
+        )
+
+        fig.update_layout(
+            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            height=800,
+            width=800,
+            title_x=0.5
+        )
+
+        return fig
+
+    def update_style(self, **kwargs) -> None:
+        """Update plot styling settings."""
+        self.style.update(kwargs)
