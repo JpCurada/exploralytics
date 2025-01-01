@@ -1,5 +1,7 @@
 # Exploralytics
 
+[![PyPI Latest Release](https://img.shields.io/pypi/v/pandas.svg)](https://pypi.org/project/exploralytics/)
+
 ## What is it?
 A Python toolkit that makes creating Plotly visualizations straightforward — focusing on common EDA plots like distributions, correlations, and other visualization. I created this to simplify my own workflow, but other data professionals might find it useful too.
 
