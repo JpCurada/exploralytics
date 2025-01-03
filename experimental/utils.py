@@ -1,3 +1,5 @@
+import pandas as pd
+
 def identify_num_rows(
     columns: list[str], 
     desired_num_col: int
@@ -28,3 +30,41 @@ def identify_num_rows(
         num_rows = (len(columns) // desired_num_col) + 1
     
     return num_rows
+
+# Utility function for creating colors
+def highlight_bars_colors(
+    highlight_top_n: tuple, 
+    highlight_low_n: tuple, 
+    data_length: pd.DataFrame
+):
+    """
+    Create color array for highlighted bars.
+
+    Parameters
+    ----------
+    highlight_top_n : tuple or None
+        (n, color) for top n bars
+    highlight_low_n : tuple or None
+        (n, color) for bottom n bars
+    data_length : int
+        Total number of bars
+
+    Returns
+    -------
+    list
+        List of colors for each bar
+    """
+    # Initialize with default grey color
+    colors = ['#E5E4E2'] * data_length
+
+    # Apply highlighting for top n if specified
+    if highlight_top_n:
+        n, color = highlight_top_n
+        colors[:n] = [color] * min(n, data_length)
+
+    # Apply highlighting for bottom n if specified
+    if highlight_low_n:
+        n, color = highlight_low_n
+        colors[-n:] = [color] * min(n, data_length)
+
+    return colors
