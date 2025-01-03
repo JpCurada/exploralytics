@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.graph_objects as go
 
 def identify_num_rows(
     columns: list[str], 
@@ -68,3 +69,61 @@ def highlight_bars_colors(
         colors[-n:] = [color] * min(n, data_length)
 
     return colors
+
+def add_footer(
+    fig: go.Figure,
+    footer_text: str,
+    footer_url: str = None,
+    footer_font_size: int = 10,
+    footer_color: str = "gray",
+    y_offset: float = -0.20,
+    x_offset: float = 0
+) -> go.Figure:
+    """
+    Add a footer to a Plotly figure with optional clickable link.
+
+    Parameters
+    ----------
+    fig : plotly.graph_objects.Figure
+        The figure to add the footer to
+    footer_text : str
+        The text to display in the footer
+    footer_url : str, optional
+        URL to link to in the footer. If provided, makes footer clickable
+    footer_font_size : int, optional
+        Size of the footer text (default: 10)
+    footer_color : str, optional
+        Color of the footer text (default: "gray")
+    y_offset : float, optional
+        Vertical position of footer relative to plot (default: -0.20)
+    x_offset : float, optional
+        Horizontal position of footer relative to plot (default: 0)
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Figure with added footer
+    """
+    # Create footer text with link if URL provided
+    if footer_url:
+        footer_html = f'<a href="{footer_url}" style="color: {footer_color};">{footer_text}</a>'
+    else:
+        footer_html = footer_text
+
+    # Add footer annotation
+    fig.add_annotation(
+        text=footer_html,
+        x=x_offset,          # Center horizontally
+        y=y_offset,          # Position below plot
+        xref="paper",
+        yref="paper",
+        showarrow=False,
+        font=dict(
+            size=footer_font_size,
+            color=footer_color
+        ),
+        align="left",
+        clicktoshow=False
+    )
+    
+    return fig
