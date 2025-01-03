@@ -358,7 +358,7 @@ class Visualizer:
 
         if y_col is None:
             # Calculate frequency of each category in x_col
-            value_counts = df[x_col].value_counts()
+            value_counts = df[x_col].value_counts().rename_axis(x_col).reset_index(name='Count')
             
             # Limit to top N categories if specified
             plot_data = value_counts.head(top_n) if top_n else value_counts
@@ -370,13 +370,13 @@ class Visualizer:
             # Create bars with custom hover text
             fig.add_trace(
                 go.Bar(
-                    y=plot_data.index,
-                    x=plot_data.values,
+                    y=plot_data[x_col],
+                    x=plot_data['Count'],
                     orientation='h',
                     marker_color=colors,
                     hovertemplate=(
-                        f"<b>%{y}</b><br>" +
-                        f"Count: %{x:,.0f}<br>" +
+                        f"<b>{x_col}</b>: " + "%{y}<br>" +
+                        f"Count: " + "%{x:,.0f}<br>" +
                         "<extra></extra>"
                     )
                 )
@@ -409,11 +409,11 @@ class Visualizer:
 
         # Add mean reference line if requested
         if add_hline:
-            mean_value = plot_data[y_col].mean() if y_col else plot_data.values.mean()
+            mean_value = plot_data[y_col].mean() if y_col else plot_data['Count'].mean()
             fig.add_vline(
                 x=mean_value,
                 line_color="grey",
-                line_dash="dash"
+                line_dash="dash",
             )
 
         # Configure plot layout and formatting
