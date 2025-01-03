@@ -5,7 +5,10 @@ import plotly.figure_factory as ff
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-from .utils import identify_num_rows
+from .utils import (
+    identify_num_rows, 
+    highlight_bars_colors
+)
 
 class Visualizer:
     """
@@ -25,17 +28,32 @@ class Visualizer:
         Plotly template name (default: "plotly_white")
     """
 
-    def __init__(self, color = "#94C973", height = 768, width = 1366, template = "plotly_white", colorscale=px.colors.diverging.Earth, style = None): 
+    def __init__(
+        self, 
+        color = "#94C973", 
+        height = 768, width = 1366, 
+        template = "plotly_white", 
+        colorscale=px.colors.diverging.Earth, 
+        style = None
+    ): 
         # Initialize visualization parameters
         self.color = color          # Set default color for plot elements
         self.height = height        # Set default plot height
         self.width = width          # Set default plot width
         self.template = template    # Set default plotly template
         self.colorscale = colorscale
+        style = style
         
-
-    def plot_histograms(self, df, specific_cols=[], num_cols=1, title='How distributed the numerical values are?', 
-                 subtitle='Histogram of each column with numerical data type', show_mean=False, show_median=False):
+    def plot_histograms(
+        self, 
+        df: pd.DataFrame, 
+        specific_cols: list[str] = [], 
+        num_cols: int = 1, 
+        title: str = 'How distributed the numerical values are?', 
+        subtitle: str = 'Histogram of each column with numerical data type', 
+        show_mean: bool = False, 
+        show_median: bool = False
+    ) -> go.Figure:
         """
         Create multiple histogram subplots for numerical columns in a dataframe.
 
@@ -123,7 +141,12 @@ class Visualizer:
                       )
         return fig
     
-    def plot_correlation_map(self, df, title: str = 'How correlated the numerical values are?', subtitle: str = 'Correlation matrix of columns with numerical data type'):
+    def plot_correlation_map(
+        self, 
+        df: pd.DataFrame, 
+        title: str = 'How correlated the numerical values are?',
+        subtitle: str = 'Correlation matrix of columns with numerical data type'
+    ) -> go.Figure:
         """
         Create a correlation matrix heatmap showing relationships between numerical columns.
 
@@ -207,7 +230,9 @@ class Visualizer:
 
         return fig
 
-    def plot_correlation_with_target(self, df: pd.DataFrame,
+    def plot_correlation_with_target(
+        self, 
+        df: pd.DataFrame,
         target_column: str,
         title: str = 'How correlated the features are with the target?',
         subtitle: str = 'Correlation coefficient of each feature'
@@ -281,4 +306,131 @@ class Visualizer:
             template=self.template          # Use class-defined template
         )
 
+        return fig
+    
+    def plot_hbar(
+        self,
+        df: pd.DataFrame,
+        x_col: str,
+        y_col: str = None, 
+        title: str = "How distributed are the categories?",
+        subtitle: str = "Horizontal bar plot of categories", 
+        top_n: int = None,
+        add_hline: bool = False,
+        highlight_top_n = None,  # (n, hex_color)
+        highlight_low_n = None   # (n, hex_color)
+    ) -> go.Figure:
+        """
+        Create a horizontal bar plot with optional highlighting and statistics.
+
+        Shows either value counts of a single column or relationship between two columns. 
+        Can highlight top/bottom values and show mean line. Bars can be limited to show 
+        only top N values.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The data to plot
+        x_col : str
+            Name of column to show on y-axis of plot
+        y_col : str, optional
+            Name of column for bar lengths. If None, shows value counts of x_col
+        title : str, optional
+            Main title of plot (default: "How distributed are the categories?")
+        subtitle : str, optional
+            Subtitle shown below main title (default: "Horizontal bar plot of categories")
+        top_n : int, optional
+            Number of bars to show. If None, shows all
+        add_hline : bool, optional
+            Whether to add mean line (default: False)
+        highlight_top_n : tuple, optional 
+            Tuple of (n, color) to highlight top n bars
+        highlight_low_n : tuple, optional
+            Tuple of (n, color) to highlight bottom n bars
+
+        Returns
+        -------
+        plotly.graph_objects.Figure
+            Interactive horizontal bar plot
+        """
+        # Create empty figure canvas
+        fig = go.Figure()
+
+        if y_col is None:
+            # Calculate frequency of each category in x_col
+            value_counts = df[x_col].value_counts()
+            
+            # Limit to top N categories if specified
+            plot_data = value_counts.head(top_n) if top_n else value_counts
+            
+            # Determine bar colors based on highlighting options
+            colors = (highlight_bars_colors(highlight_top_n, highlight_low_n, len(plot_data)) 
+                    if highlight_top_n or highlight_low_n else self.color)
+
+            # Create bars with custom hover text
+            fig.add_trace(
+                go.Bar(
+                    y=plot_data.index,
+                    x=plot_data.values,
+                    orientation='h',
+                    marker_color=colors,
+                    hovertemplate=(
+                        f"<b>%{y}</b><br>" +
+                        f"Count: %{x:,.0f}<br>" +
+                        "<extra></extra>"
+                    )
+                )
+            )
+
+        else:
+            # Sort data by y_col values
+            plot_data = df.sort_values(y_col, ascending=False)
+            if top_n:
+                plot_data = plot_data.head(top_n)
+            
+            # Determine bar colors based on highlighting options
+            colors = (highlight_bars_colors(highlight_top_n, highlight_low_n, len(plot_data))
+                    if highlight_top_n or highlight_low_n else self.color)
+
+            # Create bars with custom hover text
+            fig.add_trace(
+                go.Bar(
+                    y=plot_data[x_col],
+                    x=plot_data[y_col],
+                    orientation='h',
+                    marker_color=colors,
+                    hovertemplate=(
+                        f"<b>{x_col}</b>: " + "%{y}<br>" +
+                        f"{y_col}: " + "%{x:,.2f}<br>" +
+                        "<extra></extra>"
+                    )
+                )
+            )
+
+        # Add mean reference line if requested
+        if add_hline:
+            mean_value = plot_data[y_col].mean() if y_col else plot_data.values.mean()
+            fig.add_vline(
+                x=mean_value,
+                line_color="grey",
+                line_dash="dash"
+            )
+
+        # Configure plot layout and formatting
+        fig.update_layout(
+            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            title_x=0.5,
+            showlegend=False,
+            height=self.height,
+            width=self.width,
+            template=self.template,
+            xaxis=dict(
+                title=y_col if y_col else "Count"
+            ),
+            yaxis=dict(
+                title=x_col,
+                autorange="reversed"  # Show categories from top to bottom
+            )
+        )
+        
         return fig
