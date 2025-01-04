@@ -434,3 +434,65 @@ class Visualizer:
         )
         
         return fig
+    
+    def plot_dot(
+        self,
+        df: pd.DataFrame,
+        x_col: str,
+        y_col: str,
+        title: str = "How are the categories distributed?",
+        subtitle: str = "Dot plot of categories",
+        footer: str = None,
+        add_hline_at: float = None,
+        top_n: int = None,
+        highlight_top_n: tuple[int, str] = None,  # (n, hex_color)
+        highlight_low_n: tuple[int, str] = None   # (n, hex_color)
+    ) -> go.Figure:
+        """
+        Create a dot plot with optional highlighting and statistics.
+
+        Shows relationship between two columns with dots. Can highlight top/bottom 
+        values. Dots can be limited to show only
+        """
+        pass
+
+    def plot_lollipop(
+        self,
+        df: pd.DataFrame,
+        x_col: str,
+        y_col: str,
+        title: str = "How are the categories distributed?",
+        subtitle: str = "Dot plot of categories",
+        footer: str = None,
+        add_hline_at: float = None,
+        top_n: int = None,
+        highlight_top_n: tuple[int, str] = None,  # (n, hex_color)
+        highlight_low_n: tuple[int, str] = None   # (n, hex_color)
+    ) -> go.Figure:
+        """
+        Create a lollipop plot with optional highlighting and statistics.
+
+        Shows relationship between two columns with lollipops. Can highlight top/bottom 
+        values. Lollipops can be limited to show only
+        """
+        pass
+
+    def plot_bump(
+        self,
+        df: pd.DataFrame,
+        x_col: str,
+        y_col: str,
+        title: str = "How are the categories distributed?",
+        subtitle: str = "Dot plot of categories",
+        footer: str = None,
+        top_n: int = None,
+        highlight_top_n: tuple[int, str] = None,  # (n, hex_color)
+        highlight_low_n: tuple[int, str] = None   # (n, hex_color)
+    ) -> go.Figure:
+        """
+        Create a bump plot with optional highlighting and statistics.
+
+        Shows relationship between two columns with bumps. Can highlight top/bottom 
+        values. Bumps can be limited to show only
+        """
+        pass
