@@ -7,7 +7,8 @@ from plotly.subplots import make_subplots
 
 from .utils import (
     identify_num_rows, 
-    highlight_bars_colors
+    highlight_bars_colors,
+    add_footer
 )
 
 class Visualizer:
@@ -315,10 +316,10 @@ class Visualizer:
         y_col: str = None, 
         title: str = "How distributed are the categories?",
         subtitle: str = "Horizontal bar plot of categories", 
-        top_n: int = None,
         add_hline: bool = False,
-        highlight_top_n = None,  # (n, hex_color)
-        highlight_low_n = None   # (n, hex_color)
+        top_n: int = None,
+        highlight_top_n: tuple[int, str] = None,  # (n, hex_color)
+        highlight_low_n: tuple[int, str] = None   # (n, hex_color)
     ) -> go.Figure:
         """
         Create a horizontal bar plot with optional highlighting and statistics.
@@ -443,18 +444,122 @@ class Visualizer:
         title: str = "How are the categories distributed?",
         subtitle: str = "Dot plot of categories",
         footer: str = None,
-        add_hline_at: float = None,
+        add_hline_at: tuple[str, float] = None,  # (label, value)
         top_n: int = None,
         highlight_top_n: tuple[int, str] = None,  # (n, hex_color)
         highlight_low_n: tuple[int, str] = None   # (n, hex_color)
     ) -> go.Figure:
         """
-        Create a dot plot with optional highlighting and statistics.
+        Create a dot plot showing values as dots with connecting lines to x-axis.
 
-        Shows relationship between two columns with dots. Can highlight top/bottom 
-        values. Dots can be limited to show only
+        This plot shows values as dots above their categories, with vertical lines 
+        connecting each dot to its category on the x-axis. Can highlight highest/lowest
+        values with different colors and show a reference line at a specific value.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            Data to plot
+        x_col : str
+            Column name for categories on x-axis
+        y_col : str
+            Column name for values shown as dot heights
+        title : str, optional
+            Main title of plot
+        subtitle : str, optional
+            Subtitle shown below main title
+        footer : str, optional
+            Text to show at bottom of plot
+        add_hline_at : tuple[str, float], optional
+            Reference line (label, value) to add
+        top_n : int, optional
+            Number of dots to show, ordered by value
+        highlight_top_n : tuple[int, str], optional
+            (number, color) for highlighting highest values
+        highlight_low_n : tuple[int, str], optional
+            (number, color) for highlighting lowest values
+
+        Returns
+        -------
+        plotly.graph_objects.Figure
+            Interactive dot plot figure
         """
-        pass
+        # Sort values in descending order and limit to top_n if specified
+        plot_data = df.sort_values(y_col, ascending=False)
+        if top_n:
+            plot_data = plot_data.head(top_n)
+        
+        # Get colors for dots based on highlighting options
+        colors = (highlight_bars_colors(highlight_top_n, highlight_low_n, len(plot_data))
+                if highlight_top_n or highlight_low_n else self.color)
+
+        # Create figure and add dots with hover information
+        fig = go.Figure()
+        fig.add_trace(
+          go.Scatter(
+              x=plot_data[x_col],
+              y=plot_data[y_col],
+              mode='markers+text',
+              marker=dict(
+                  color=colors,
+                  size=18
+              ),
+              text=plot_data[y_col].round(1),
+              textposition='top center',
+              hovertemplate=(
+                  f"<b>{x_col}</b>: " + "%{x}<br>" +
+                  f"{y_col}: " + "%{y:,.2f}<br>" +
+                  "<extra></extra>"
+              )
+          )
+        )
+
+        # Add vertical connecting lines between dots and x-axis
+        for i, row in plot_data.iterrows():
+          fig.add_shape(
+              type='line',
+              x0=row[x_col],
+              x1=row[x_col],
+              y0=0,
+              y1=row[y_col],
+              line=dict(color='lightgrey', width=2),
+              layer="below",
+          )
+
+        # Add optional reference line with label
+        if add_hline_at is not None:
+          fig.add_hline(
+              y=add_hline_at[-1],
+              line=dict(color='grey', dash='dot', width=0.5),
+              annotation_text=f'{add_hline_at[0]}: {add_hline_at[-1]:.1f}',
+              annotation_position='top right', 
+              layer="below",
+          )
+          
+        # Set up plot layout and styling
+        fig.update_layout(
+            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            title_x=0.5,
+            showlegend=False,
+            height=self.height,
+            width=self.width,
+            template=self.template,
+            yaxis=dict(title="", visible=False),  # Hide y-axis
+            xaxis=dict(
+                title="",
+                showline=True,
+                linecolor='lightgrey',
+                linewidth=2,
+                type='category',
+            ),
+            margin=dict(t=100, pad=0),
+        )
+
+        # Add optional footer
+        if footer is not None:
+          add_footer(fig, footer)
+
+        return fig
 
     def plot_lollipop(
         self,
