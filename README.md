@@ -20,7 +20,6 @@ viz.plot_correlation(df, title='Correlations')
 viz.plot_distributions(df, title='Analysis')
 ```
 
-fixfixfix
 ## Installation
 
 First, make sure you have Python 3.7 or newer.
