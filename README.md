@@ -122,4 +122,4 @@ BSD 3-Clause License
 Open an issue on GitHub if you run into problems or have suggestions. I check them regularly and try to help when I can.
 
 ---
-Note: This is an early release — I'm using it for my own work and sharing it in case others find it helpful. Expect updates and improvements as I add features I need.
+Note: This is an early release — I'm using it for my own work and sharing it in case others find it helpful. Expect updates and improvements as I add features I need. Looking for collaborators!
