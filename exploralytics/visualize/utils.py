@@ -1,203 +1,130 @@
-"""
-Utility functions for the Exploralytics visualization module.
-
-This module contains helper functions for:
-1. Data validation and processing
-2. Layout calculations
-3. Column type identification
-"""
-
-from typing import List, Tuple, Union
 import pandas as pd
-import numpy as np
+import plotly.graph_objects as go
 
-
-def check_data(df: pd.DataFrame) -> None:
-    """
-    Validate if DataFrame is not empty.
-
-    Args:
-        df: DataFrame to check
-
-    Raises:
-        ValueError: If DataFrame is empty
-        TypeError: If input is not a pandas DataFrame
-    """
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("Input must be a pandas DataFrame")
-    
-    if df.empty:
-        raise ValueError("DataFrame is empty")
-
-
-def get_number_columns(
-    df: pd.DataFrame,
-    columns: List[str] = None
-) -> List[str]:
-    """
-    Get list of numeric columns from DataFrame.
-
-    Args:
-        df: DataFrame to analyze
-        columns: Specific columns to check (default: None, checks all columns)
-
-    Returns:
-        List of column names containing numeric data
-
-    Raises:
-        ValueError: If no numeric columns found
-    """
-    if columns:
-        number_cols = [
-            col for col in columns 
-            if df[col].dtype in ['int64', 'float64']
-        ]
-    else:
-        number_cols = df.select_dtypes(
-            include=['int64', 'float64']
-        ).columns.tolist()
-    
-    if not number_cols:
-        raise ValueError("No numeric columns found")
-        
-    return number_cols
-
-
-def calc_subplot_size(
-    total_plots: int,
-    plots_per_row: int,
-    height_per_plot: int
-) -> Tuple[int, float]:
-    """
-    Calculate subplot layout dimensions.
-
-    Args:
-        total_plots: Total number of plots needed
-        plots_per_row: Number of plots to put in each row
-        height_per_plot: Height in pixels for each individual plot
-
-    Returns:
-        Tuple containing:
-        - Number of rows needed
-        - Total height for all plots
-
-    Examples:
-        >>> num_rows, total_height = calc_subplot_size(5, 2, 300)
-        >>> print(num_rows)  # 3 rows needed
-        >>> print(total_height)  # 750 pixels total height
-    """
-    # Calculate number of rows needed
-    num_rows = (total_plots + plots_per_row - 1) // plots_per_row
-    
-    # Calculate total height needed
-    total_height = (total_plots * height_per_plot) / plots_per_row
-    
-    return num_rows, total_height
-
-
-def identify_plot_layout(
-    num_plots: int,
-    max_cols: int = 3
-) -> Tuple[int, int]:
-    """
-    Determine optimal number of rows and columns for subplots.
-
-    Creates a balanced layout that's visually appealing.
-
-    Args:
-        num_plots: Number of plots to arrange
-        max_cols: Maximum number of columns allowed (default: 3)
-
-    Returns:
-        Tuple containing:
-        - Number of rows
-        - Number of columns
-
-    Examples:
-        >>> rows, cols = identify_plot_layout(5)
-        >>> print(f"{rows} rows, {cols} columns")  # "2 rows, 3 columns"
-    """
-    # For single plot, return 1x1 layout
-    if num_plots == 1:
-        return 1, 1
-    
-    # For 2 plots, return 1x2 layout
-    if num_plots == 2:
-        return 1, 2
-    
-    # For other cases, calculate optimal layout
-    cols = min(num_plots, max_cols)
-    rows = (num_plots + cols - 1) // cols
-    
-    return rows, cols
-
-
-def validate_color(color: str) -> bool:
-    """
-    Check if color string is valid hex code.
-
-    Args:
-        color: Color string to validate (e.g., '#FF0000')
-
-    Returns:
-        True if valid hex color, False otherwise
-
-    Examples:
-        >>> validate_color('#FF0000')  # True
-        >>> validate_color('invalid')  # False
-    """
-    if not isinstance(color, str):
-        return False
-    
-    # Check if string starts with # and has 6 hex digits
-    if len(color) == 7 and color.startswith('#'):
-        try:
-            # Try converting hex color to integer
-            int(color[1:], 16)
-            return True
-        except ValueError:
-            return False
-    
-    return False
-
-
-def suggest_bin_count(
-    data: Union[pd.Series, np.ndarray],
-    min_bins: int = 10,
-    max_bins: int = 50
+def identify_num_rows(
+    columns: list[str], 
+    desired_num_col: int
 ) -> int:
     """
-    Suggest number of bins for histogram based on data.
+    Calculate how many rows are needed to display a set of plots in a grid layout.
 
-    Uses Freedman-Diaconis rule with limits.
+    Determines the number of rows needed to fit all plots when organizing them into 
+    columns. Handles both when plots divide evenly into columns and when they don't.
 
-    Args:
-        data: Data series to analyze
-        min_bins: Minimum number of bins (default: 10)
-        max_bins: Maximum number of bins (default: 50)
+    Parameters
+    ----------
+    columns : list
+        List of items that need to be arranged in a grid
+    desired_num_col : int
+        Number of columns to arrange the plots into
 
-    Returns:
-        Suggested number of bins
-
-    Examples:
-        >>> data = np.random.normal(0, 1, 1000)
-        >>> bins = suggest_bin_count(data)
+    Returns
+    -------
+    int
+        Number of rows needed for the grid layout
     """
-    # Convert to numpy array if needed
-    if isinstance(data, pd.Series):
-        data = data.dropna().values
+    # If plots divide evenly into columns, use simple division
+    if (len(columns) % desired_num_col) == 0:
+        num_rows = len(columns) // desired_num_col
+    # If plots don't divide evenly, add an extra row to fit remaining plots
+    else:
+        num_rows = (len(columns) // desired_num_col) + 1
     
-    # Use Freedman-Diaconis rule
-    q75, q25 = np.percentile(data, [75, 25])
-    iqr = q75 - q25
-    bin_width = 2 * iqr * (len(data) ** (-1/3))
+    return num_rows
+
+# Utility function for creating colors
+def highlight_bars_colors(
+    highlight_top_n: tuple, 
+    highlight_low_n: tuple, 
+    data_length: pd.DataFrame
+):
+    """
+    Create color array for highlighted bars.
+
+    Parameters
+    ----------
+    highlight_top_n : tuple or None
+        (n, color) for top n bars
+    highlight_low_n : tuple or None
+        (n, color) for bottom n bars
+    data_length : int
+        Total number of bars
+
+    Returns
+    -------
+    list
+        List of colors for each bar
+    """
+    # Initialize with default grey color
+    colors = ['#E5E4E2'] * data_length
+
+    # Apply highlighting for top n if specified
+    if highlight_top_n:
+        n, color = highlight_top_n
+        colors[:n] = [color] * min(n, data_length)
+
+    # Apply highlighting for bottom n if specified
+    if highlight_low_n:
+        n, color = highlight_low_n
+        colors[-n:] = [color] * min(n, data_length)
+
+    return colors
+
+def add_footer(
+    fig: go.Figure,
+    footer_text: str,
+    footer_url: str = None,
+    footer_font_size: int = 10,
+    footer_color: str = "gray",
+    y_offset: float = -0.19,
+    x_offset: float = 0
+) -> go.Figure:
+    """
+    Add a footer to a Plotly figure with optional clickable link.
+
+    Parameters
+    ----------
+    fig : plotly.graph_objects.Figure
+        The figure to add the footer to
+    footer_text : str
+        The text to display in the footer
+    footer_url : str, optional
+        URL to link to in the footer. If provided, makes footer clickable
+    footer_font_size : int, optional
+        Size of the footer text (default: 10)
+    footer_color : str, optional
+        Color of the footer text (default: "gray")
+    y_offset : float, optional
+        Vertical position of footer relative to plot (default: -0.20)
+    x_offset : float, optional
+        Horizontal position of footer relative to plot (default: 0)
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Figure with added footer
+    """
+    # Create footer text with link if URL provided
+    if footer_url:
+        footer_html = f'<a href="{footer_url}" style="color: {footer_color};">{footer_text}</a>'
+    else:
+        footer_html = footer_text
+
+    # Add footer annotation
+    fig.add_annotation(
+        text=footer_html,
+        x=x_offset,          # Center horizontally
+        y=y_offset,          # Position below plot
+        xref="paper",
+        yref="paper",
+        showarrow=False,
+        font=dict(
+            size=footer_font_size,
+            color=footer_color
+        ),
+        align="left",
+        clicktoshow=False
+    )
     
-    if bin_width == 0:
-        return min_bins
-    
-    # Calculate number of bins
-    data_range = np.ptp(data)
-    num_bins = int(np.ceil(data_range / bin_width))
-    
-    # Apply limits
-    return np.clip(num_bins, min_bins, max_bins)
+    return fig
+
