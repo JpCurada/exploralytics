@@ -51,7 +51,8 @@ class Visualizer:
         specific_cols: list[str] = [], 
         num_cols: int = 1, 
         title: str = 'How distributed the numerical values are?', 
-        subtitle: str = 'Histogram of each column with numerical data type', 
+        subtitle: str = 'Histogram of each column with numerical data type',
+        footer: str = None, 
         show_mean: bool = False, 
         show_median: bool = False
     ) -> go.Figure:
@@ -72,6 +73,8 @@ class Visualizer:
             Main title of the plot
         subtitle : str, optional
             Subtitle of the plot
+        footer : str, optional
+            Text to show at bottom of plot
         show_mean : bool, optional
             Whether to show mean line on histograms (default: False)
         show_median : bool, optional
@@ -132,6 +135,10 @@ class Visualizer:
             # Update subplot annotations font size
             fig.update_annotations(font_size=12)
 
+        # Add optional footer
+        if footer is not None:
+          add_footer(fig, footer)
+
         # Update overall figure layout
         fig.update_layout(title_text=f"{title}<br><sup>{subtitle}<sup>",
                         showlegend=False,
@@ -146,7 +153,8 @@ class Visualizer:
         self, 
         df: pd.DataFrame, 
         title: str = 'How correlated the numerical values are?',
-        subtitle: str = 'Correlation matrix of columns with numerical data type'
+        subtitle: str = 'Correlation matrix of columns with numerical data type',
+        footer: str = None
     ) -> go.Figure:
         """
         Create a correlation matrix heatmap showing relationships between numerical columns.
@@ -163,6 +171,8 @@ class Visualizer:
             Main title for the plot (default: 'How correlated the numerical values are?')
         subtitle : str, optional
             Subtitle to display below main title (default: 'Correlation matrix of columns with numerical data type')
+        footer : str, optional
+            Text to show at bottom of plot
 
         Returns
         -------
@@ -197,6 +207,10 @@ class Visualizer:
             hoverinfo='text',               # Use custom hover text
             text=hovertext                  # Custom hover text
         )
+
+        # Add optional footer
+        if footer is not None:
+          add_footer(fig, footer)
 
         # Move x-axis labels to bottom of plot
         fig.update_xaxes(side="bottom")
@@ -236,7 +250,8 @@ class Visualizer:
         df: pd.DataFrame,
         target_column: str,
         title: str = 'How correlated the features are with the target?',
-        subtitle: str = 'Correlation coefficient of each feature'
+        subtitle: str = 'Correlation coefficient of each feature',
+        footer: str = None
     ) -> go.Figure:
         """
         Create a horizontal bar chart showing how each feature correlates with a target variable.
@@ -256,6 +271,8 @@ class Visualizer:
             Main title for the plot (default: 'How correlated the features are with the target?')
         subtitle : str, optional
             Subtitle to display below main title (default: 'Correlation coefficient of each feature')
+        footer : str, optional
+            Text to show at bottom of plot
 
         Returns
         -------
@@ -285,6 +302,10 @@ class Visualizer:
                 textposition='outside',      # Place text outside of bars
             )
         )
+
+        # Add optional footer
+        if footer is not None:
+          add_footer(fig, footer)
 
         # Configure figure layout
         fig.update_layout(
@@ -316,6 +337,7 @@ class Visualizer:
         y_col: str = None, 
         title: str = "How distributed are the categories?",
         subtitle: str = "Horizontal bar plot of categories", 
+        footer: str = None,
         add_hline: bool = False,
         top_n: int = None,
         highlight_top_n: tuple[int, str] = None,  # (n, hex_color)
@@ -340,6 +362,8 @@ class Visualizer:
             Main title of plot (default: "How distributed are the categories?")
         subtitle : str, optional
             Subtitle shown below main title (default: "Horizontal bar plot of categories")
+        footer : str, optional
+            Text to show at bottom of plot
         top_n : int, optional
             Number of bars to show. If None, shows all
         add_hline : bool, optional
@@ -416,6 +440,10 @@ class Visualizer:
                 line_color="grey",
                 line_dash="dash",
             )
+
+        # Add optional footer
+        if footer is not None:
+          add_footer(fig, footer)
 
         # Configure plot layout and formatting
         fig.update_layout(
