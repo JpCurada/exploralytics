@@ -2,7 +2,7 @@
 
 import pandas as pd
 import numpy as np
-from exploralytics.visualize import Visualizer
+from src.visualize import Visualizer
 
 def create_sample_data():
     """Create sample data for demonstration."""

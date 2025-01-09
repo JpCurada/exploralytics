@@ -21,9 +21,9 @@ For examples and documentation:
 https://github.com/JpCurada/exploralytics
 """
 
-from exploralytics.visualize import Visualizer
+from src.visualize import Visualizer
 
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 __author__ = 'John Paul Curada'
 __email__ = 'johncurada02.work@gmail.com'
 

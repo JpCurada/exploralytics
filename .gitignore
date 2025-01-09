@@ -5,3 +5,5 @@ exploralytics/__pycache__/
 .coverage
 .vscode/
 .pytest_cache/
+src/tests/
+disregard/
