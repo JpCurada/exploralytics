@@ -72,12 +72,11 @@ def highlight_bars_colors(
 
 def add_footer(
     fig: go.Figure,
-    footer_text: str = None,
-    font_family: str = None,
+    footer_text: str,
     footer_url: str = None,
     footer_font_size: int = 10,
     footer_color: str = "gray",
-    y_offset: float = -0.10,
+    y_offset: float = -0.19,
     x_offset: float = 0
 ) -> go.Figure:
     """
@@ -87,10 +86,8 @@ def add_footer(
     ----------
     fig : plotly.graph_objects.Figure
         The figure to add the footer to
-    footer_text : str, optional
+    footer_text : str
         The text to display in the footer
-    font_family : str, optional
-        Font family for the footer text
     footer_url : str, optional
         URL to link to in the footer. If provided, makes footer clickable
     footer_font_size : int, optional
@@ -123,8 +120,7 @@ def add_footer(
         showarrow=False,
         font=dict(
             size=footer_font_size,
-            color=footer_color,
-            family=font_family
+            color=footer_color
         ),
         align="left",
         clicktoshow=False
