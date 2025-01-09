@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
-    "Topic :: Data Analytics :: Visualization",
+    "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = [
     "pandas>=1.3.0",
@@ -32,5 +32,5 @@ dependencies = [
 "Bug Tracker" = "https://github.com/jpcurada/exploralytics/issues"
 "Source Code" = "https://github.com/jpcurada/exploralytics"
 
-[tool.hatch.build.targets.wheel]
-packages = ["exploralytics"]
+[tool.setuptools.packages.find]
+where = ["src"]
