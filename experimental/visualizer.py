@@ -33,7 +33,7 @@ class Visualizer:
         self, 
         color = "#94C973", 
         height = 768, width = 1366, 
-        template = "plotly_white", 
+        template = "simple_white", 
         colorscale=px.colors.diverging.Earth,
         texts_font_style: str = None,
         title_bold: bool = False, 
