@@ -1,6 +1,8 @@
 # Exploralytics
 
 [![PyPI Latest Release](https://img.shields.io/pypi/v/exploralytics.svg)](https://pypi.org/project/exploralytics/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue.svg)](https://www.linkedin.com/in/jpcurada/)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-black.svg)](https://github.com/JpCurada)
 
 ## What is it?
 A Python toolkit that streamlines the creation of Plotly visualizations for exploratory data analysis (EDA). Built to simplify the visualization workflow, Exploralytics provides an intuitive interface for creating common EDA plots like histograms, correlation matrices, and bar charts with consistent styling and formatting.
