@@ -34,8 +34,9 @@ class Visualizer:
         color = "#94C973", 
         height = 768, width = 1366, 
         template = "plotly_white", 
-        colorscale=px.colors.diverging.Earth, 
-        style = None
+        colorscale=px.colors.diverging.Earth,
+        texts_font_style: str = None,
+        title_bold: bool = False, 
     ): 
         # Initialize visualization parameters
         self.color = color          # Set default color for plot elements
@@ -43,6 +44,8 @@ class Visualizer:
         self.width = width          # Set default plot width
         self.template = template    # Set default plotly template
         self.colorscale = colorscale
+        self.font_family = texts_font_style
+        self.title_bold = title_bold
         style = style
         
     def plot_histograms(
@@ -54,7 +57,7 @@ class Visualizer:
         subtitle: str = 'Histogram of each column with numerical data type',
         footer: str = None, 
         show_mean: bool = False, 
-        show_median: bool = False
+        show_median: bool = False,
     ) -> go.Figure:
         """
         Create multiple histogram subplots for numerical columns in a dataframe.
@@ -79,7 +82,11 @@ class Visualizer:
             Whether to show mean line on histograms (default: False)
         show_median : bool, optional
             Whether to show median line on histograms (default: False)
-
+        font_family : str, optional
+            Font family for text elements (default: None)
+        title_bold : bool, optional
+            Whether to make title text bold (default: False)
+        
         Returns
         -------
         plotly.graph_objects.Figure
@@ -137,16 +144,17 @@ class Visualizer:
 
         # Add optional footer
         if footer is not None:
-          add_footer(fig, footer)
+          add_footer(fig, footer, font_family=self.font_family)
 
         # Update overall figure layout
-        fig.update_layout(title_text=f"{title}<br><sup>{subtitle}<sup>",
-                        showlegend=False,
-                        height=self.height,
-                        width=self.width,
-                        title_x=0.5,
-                        template=self.template
-                      )
+        fig.update_layout(
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",
+            showlegend=False,
+            height=self.height,
+            width=self.width,
+            title_x=0.5,
+            template=self.template
+            )
         return fig
     
     def plot_correlation_map(
@@ -210,14 +218,14 @@ class Visualizer:
 
         # Add optional footer
         if footer is not None:
-          add_footer(fig, footer)
+          add_footer(fig, footer, font_family=self.font_family)
 
         # Move x-axis labels to bottom of plot
         fig.update_xaxes(side="bottom")
 
         # Update overall figure layout
         fig.update_layout(
-            title_text=f"{title}<br><sup>{subtitle}</sup>", 
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>", 
             title_x=0.5,                    # Center title
             width=self.width, 
             height=self.height,
@@ -305,11 +313,11 @@ class Visualizer:
 
         # Add optional footer
         if footer is not None:
-          add_footer(fig, footer)
+          add_footer(fig, footer, font_family=self.font_family)
 
         # Configure figure layout
         fig.update_layout(
-            title_text=f"{title}<br><sup>{subtitle}</sup>",  # Set two-line title
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",  # Set two-line title
             title_x=0.5,                    # Center the title
             xaxis=dict(
                 title='Correlation Coefficient',
@@ -443,11 +451,11 @@ class Visualizer:
 
         # Add optional footer
         if footer is not None:
-          add_footer(fig, footer)
+          add_footer(fig, footer, font_family=self.font_family)
 
         # Configure plot layout and formatting
         fig.update_layout(
-            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",
             title_x=0.5,
             showlegend=False,
             height=self.height,
@@ -566,7 +574,7 @@ class Visualizer:
           
         # Set up plot layout and styling
         fig.update_layout(
-            title_text=f"{title}<br><sup>{subtitle}</sup>",
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",
             title_x=0.5,
             showlegend=False,
             height=self.height,
@@ -585,7 +593,7 @@ class Visualizer:
 
         # Add optional footer
         if footer is not None:
-          add_footer(fig, footer)
+          add_footer(fig, footer, font_family=self.font_family)
 
         return fig
 
