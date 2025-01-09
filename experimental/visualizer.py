@@ -118,6 +118,7 @@ class Visualizer:
                                   autobinx=True,
                                   name=col_name,
                                   marker_color=self.color,
+                                  hovertemplate="Interval: %{x}<br>Count: %{y}<extra></extra>"
                                   ),
                       row=row,
                       col=col)
@@ -461,7 +462,8 @@ class Visualizer:
             width=self.width,
             template=self.template,
             xaxis=dict(
-                title=y_col if y_col else "Count"
+                title=y_col if y_col else "Count",
+                font=dict(family=self.font_family)
             ),
             yaxis=dict(
                 title=x_col,
