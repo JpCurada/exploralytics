@@ -46,7 +46,6 @@ class Visualizer:
         self.colorscale = colorscale
         self.font_family = texts_font_style
         self.title_bold = title_bold
-        style = style
         
     def plot_histograms(
         self, 
