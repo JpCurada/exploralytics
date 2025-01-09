@@ -77,7 +77,7 @@ def add_footer(
     footer_url: str = None,
     footer_font_size: int = 10,
     footer_color: str = "gray",
-    y_offset: float = -0.19,
+    y_offset: float = -0.10,
     x_offset: float = 0
 ) -> go.Figure:
     """

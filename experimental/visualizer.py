@@ -6,7 +6,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 
 from .utils import (
-    identify_num_rows, 
+    identify_num_rows,
     highlight_bars_colors,
     add_footer
 )
@@ -47,6 +47,49 @@ class Visualizer:
         self.font_family = texts_font_style
         self.title_bold = title_bold
         
+    def _get_base_layout_config(self, title: str, subtitle: str) -> dict:
+        """
+        Create a base layout configuration for Plotly figures.
+
+        Args:
+            title (str): title of the plot
+            subtitle (str): subtitle of the plot
+
+        Returns:
+            dict: dictionary containing layout configuration
+        """
+
+        return dict(
+            # Title configuration
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",  # Set title and subtitle text with optional bold
+            title_x=0.5,  # Center title horizontally
+            
+            # General figure settings
+            showlegend=False,  # Hide legend by default
+            height=self.height,  # Set figure height from class attribute
+            width=self.width,  # Set figure width from class attribute
+            template=self.template,  # Use template defined in class
+            
+            # Hover label settings
+            hoverlabel_font_family=self.font_family,  # Set font family for hover labels
+            
+            # X-axis settings
+            xaxis_title_font_family=self.font_family,  # Set font family for x-axis title
+            xaxis_tickfont_family=self.font_family,  # Set font family for x-axis tick labels
+            xaxis_ticks="",  # Remove x-axis tick marks
+            xaxis_showline=False,  # Remove x-axis line
+            xaxis_ticklabelstandoff=10,  # Increase distance between tick labels and axis line
+            xaxis_zeroline = False,  # Hide x-axis zero line
+            
+            # Y-axis settings
+            yaxis_title_font_family=self.font_family,  # Set font family for y-axis title
+            yaxis_tickfont_family=self.font_family,  # Set font family for y-axis tick labels
+            yaxis_ticks="",  # Remove y-axis tick marks
+            yaxis_showline=False,  # Remove x-axis line
+            yaxis_ticklabelstandoff=10,  # Increase distance between tick labels and axis line
+            yaxis_zeroline = False,  # Hide y-axis zero line
+        )
+
     def plot_histograms(
         self, 
         df: pd.DataFrame, 
@@ -126,35 +169,47 @@ class Visualizer:
             # Add mean line if requested
             if show_mean:
                 fig.add_vline(x=df[col_name].mean(),
-                          line_color="#D3D3D3",  
-                          line_dash="solid",
-                          row=row,
-                          col=col)
-              
+                            line_color="grey",  # Changed color for visibility
+                            line_dash="solid",
+                            line_width=2,      # Made line thicker
+                            row=row,
+                            col=col,
+                          )
+                
             # Add median line if requested
             if show_median:
                 fig.add_vline(x=df[col_name].median(),
-                          line_color="#D3D3D3",  
-                          line_dash="dot",
-                          row=row,
-                          col=col)
+                            line_color="grey",  # Changed color for visibility
+                            line_dash="dash",
+                            line_width=2,      # Made line thicker
+                            row=row,
+                            col=col,
+                          )
+
+        # Apply the layout configuration
+        fig.update_layout(
+            # Title configuration
+            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",  # Set title and subtitle text with optional bold
+            title_x=0.5,  # Center title horizontally
             
-            # Update subplot annotations font size
-            fig.update_annotations(font_size=12)
+            # General figure settings
+            showlegend=False,  # Hide legend by default
+            height=self.height,  # Set figure height from class attribute
+            width=self.width,  # Set figure width from class attribute
+            template=self.template,  # Use template defined in class
+            
+            # Hover label settings
+            hoverlabel_font_family=self.font_family,  # Set font family for hover labels
+            
+            # X-axis settings
+            xaxis_title_font_family=self.font_family,  # Set font family for x-axis title
+            xaxis_tickfont_family=self.font_family,  # Set font family for x-axis tick labels
+        )
 
         # Add optional footer
         if footer is not None:
           add_footer(fig, footer, font_family=self.font_family)
-
-        # Update overall figure layout
-        fig.update_layout(
-            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",
-            showlegend=False,
-            height=self.height,
-            width=self.width,
-            title_x=0.5,
-            template=self.template
-            )
+        
         return fig
     
     def plot_correlation_map(
@@ -223,23 +278,21 @@ class Visualizer:
         # Move x-axis labels to bottom of plot
         fig.update_xaxes(side="bottom")
 
-        # Update overall figure layout
-        fig.update_layout(
-            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>", 
-            title_x=0.5,                    # Center title
-            width=self.width, 
-            height=self.height,
-            xaxis_showgrid=False,           # Hide x-axis gridlines
-            yaxis_showgrid=False,           # Hide y-axis gridlines
-            xaxis_zeroline=False,           # Hide x-axis zero line
-            yaxis_zeroline=False,           # Hide y-axis zero line
-            yaxis_autorange='reversed',     # Reverse y-axis order
-            template=self.template,
-            xaxis=dict(
-                tickangle=90,               # Rotate x-axis labels 90 degrees
-            ),
-        )
+        # Get the base configuration
+        layout_config = self._get_base_layout_config(title, subtitle)
 
+        # Add/update specific settings for this plot
+        layout_config.update({
+            'xaxis_showgrid': False,           # Hide x-axis gridlines
+            'yaxis_showgrid': False,           # Hide y-axis gridlines
+            'yaxis_autorange': 'reversed',     # Reverse y-axis order
+            'xaxis_tickangle': 90,             # Rotate x-axis labels
+
+        })
+
+        # Apply the combined layout configuration
+        fig.update_layout(**layout_config)
+ 
         # Format cell annotations - remove NaN values and format numbers
         for i in range(len(fig.layout.annotations)):
             if fig.layout.annotations[i].text == 'nan':
@@ -315,27 +368,21 @@ class Visualizer:
         if footer is not None:
           add_footer(fig, footer, font_family=self.font_family)
 
-        # Configure figure layout
-        fig.update_layout(
-            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",  # Set two-line title
-            title_x=0.5,                    # Center the title
-            xaxis=dict(
-                title='Correlation Coefficient',
-                zeroline=True,              # Show zero reference line
-                zerolinewidth=2,            # Make zero line thicker
-                gridwidth=1,                # Width of grid lines
-                tickformat='.2f'            # Show values to 2 decimal places
-            ),
-            yaxis=dict(
-                title='Features',
-                autorange="reversed"        # Reverse feature order to match correlation matrix
-            ),
-            # Set dynamic height based on number of features, minimum 400px
-            height=max(400, len(correlations) * 30),  
-            showlegend=False,               # Hide legend
-            template=self.template          # Use class-defined template
-        )
+        # Get the base configuration
+        layout_config = self._get_base_layout_config(title, subtitle)
 
+        # Update base configuration with specific settings
+        layout_config.update({
+            'height': max(400, len(correlations) * 30),  # Dynamic height
+            'xaxis_title': 'Correlation Coefficient',
+            'xaxis_gridwidth': 1,
+            'xaxis_tickformat': '.2f',
+            'yaxis_title': 'Features',
+            'yaxis_autorange': "reversed"
+        })
+
+        # Apply the combined layout configuration
+        fig.update_layout(**layout_config)
         return fig
     
     def plot_hbar(
@@ -447,30 +494,25 @@ class Visualizer:
                 x=mean_value,
                 line_color="grey",
                 line_dash="dash",
+                line_width=2,
             )
 
         # Add optional footer
         if footer is not None:
           add_footer(fig, footer, font_family=self.font_family)
 
-        # Configure plot layout and formatting
-        fig.update_layout(
-            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",
-            title_x=0.5,
-            showlegend=False,
-            height=self.height,
-            width=self.width,
-            template=self.template,
-            xaxis=dict(
-                title=y_col if y_col else "Count",
-                font=dict(family=self.font_family)
-            ),
-            yaxis=dict(
-                title=x_col,
-                autorange="reversed"  # Show categories from top to bottom
-            )
-        )
-        
+        # Get the base configuration
+        layout_config = self._get_base_layout_config(title, subtitle)
+
+        # Update base configuration with specific settings
+        layout_config.update({
+            'xaxis_title': y_col if y_col else "Count", # Set x-axis title to column name or default
+            'yaxis_title': x_col,   # Set y-axis title to column name
+            'yaxis_autorange': "reversed"  # Show categories from top to bottom
+        })
+
+        # Apply the combined layout configuration
+        fig.update_layout(**layout_config)
         return fig
     
     def plot_dot(
@@ -572,30 +614,28 @@ class Visualizer:
               annotation_position='top right', 
               layer="below",
           )
-          
-        # Set up plot layout and styling
-        fig.update_layout(
-            title_text=f"<b>{title}</b><br><sup>{subtitle}</sup>" if self.title_bold else f"{title}<br><sup>{subtitle}</sup>",
-            title_x=0.5,
-            showlegend=False,
-            height=self.height,
-            width=self.width,
-            template=self.template,
-            yaxis=dict(title="", visible=False),  # Hide y-axis
-            xaxis=dict(
-                title="",
-                showline=True,
-                linecolor='lightgrey',
-                linewidth=2,
-                type='category',
-            ),
-            margin=dict(t=100, pad=0),
-        )
 
         # Add optional footer
         if footer is not None:
           add_footer(fig, footer, font_family=self.font_family)
+          
+        # Get the base configuration
+        layout_config = self._get_base_layout_config(title, subtitle)
 
+        # Update base configuration with specific settings
+        layout_config.update({
+            'yaxis_title': "",
+            'yaxis_visible': False,  # Hide y-axis
+            'xaxis_title': "",
+            'xaxis_showline': True,
+            'xaxis_linecolor': 'lightgrey',
+            'xaxis_linewidth': 2,
+            'xaxis_type': 'category',
+            'margin': dict(t=100, pad=0)  # Override base margin settings
+        })
+
+        # Apply the combined layout configuration
+        fig.update_layout(**layout_config)
         return fig
 
     def plot_lollipop(
