@@ -15,7 +15,7 @@ class Visualizer:
     """
     A class to create and customize data visualizations using Plotly.
 
-    This class provides methods to generate various plots with consistent styling and formatting. It allows customization of plot colors, dimensions, and templates.
+    This class provides methods to generate various plots with consistent styling and formatting. It allows customization of plot colors, dimensions, templates, and other visual elements.
 
     Attributes
     ----------
@@ -26,9 +26,20 @@ class Visualizer:
     width : int
         Width of the plot in pixels (default: 1366)
     template : str
-        Plotly template name (default: "plotly_white")
-    """
+        Plotly template name (default: "simple_white")
+    colorscale : list
+        Colorscale for the plot (default: px.colors.diverging.Earth)
+    texts_font_style : str, optional
+        Font style for text elements in the plot (default: None)
+    title_bold : bool
+        Flag to set the plot title in bold (default: False)
 
+    Methods
+    -------
+    __init__(color="#94C973", height=768, width=1366, template="simple_white", colorscale=px.colors.diverging.Earth, texts_font_style=None, title_bold=False)
+        Initializes the Visualizer with the specified parameters.
+    """
+    
     def __init__(
         self, 
         color = "#94C973", 
