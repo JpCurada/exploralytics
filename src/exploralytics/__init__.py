@@ -5,7 +5,7 @@ Exploralytics
 A Python toolkit for data exploration and visualization.
 
 Quick Start:
-    from exploralytics.visualize import Visualizer
+    from exploralytics import Visualizer
     
     viz = Visualizer()
     viz.plot_histograms(df, title='My Analysis')
@@ -21,10 +21,10 @@ For examples and documentation:
 https://github.com/JpCurada/exploralytics
 """
 
-from src.visualize import Visualizer
+from .visualize import Visualizer
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'  # Updated version
 __author__ = 'John Paul Curada'
-__email__ = 'johncurada02.work@gmail.com'
+__email__ = 'johncurada.work@gmail.com'
 
 __all__ = ['Visualizer']

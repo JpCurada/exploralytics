@@ -1,42 +1,70 @@
-
 """
 Exploralytics Visualization Module
 --------------------------------
 
-Create data visualizations with minimal code.
+A powerful toolkit for data exploration and visualization using Plotly.
 
-Examples:
-    # Initialize visualizer
-    from exploralytics.visualize import Visualizer
-    viz = Visualizer()
+Quick Start:
+    from exploralytics import Visualizer
 
-    # Distribution plots
-    viz.plot_histograms(
-        df,
-        title='Feature Distributions',
-        plots_per_row=2
+    # Initialize visualizer with custom settings
+    viz = Visualizer(
+        color="#94C973",
+        height=768,
+        width=1366,
+        template="simple_white",
+        title_bold=True
     )
 
-    # Correlation analysis
-    viz.plot_correlation(
+    # Multiple histograms with statistics
+    fig = viz.plot_histograms(
         df,
-        title='Feature Relationships'
+        title='Distribution Analysis',
+        num_cols=2,
+        show_mean=True,
+        show_median=True
     )
 
-    # Time series analysis
-    viz.plot_time_series(
+    # Correlation heatmap
+    fig = viz.plot_correlation_map(
         df,
-        date_column='date',
-        value_column='value'
+        title='Feature Correlations'
     )
+
+    # Horizontal bar plot with highlights
+    fig = viz.plot_hbar(
+        df,
+        x_col='category',
+        y_col='values',
+        highlight_top_n=(3, "green"),
+        highlight_low_n=(2, "red")
+    )
+
+    # Dot plot with reference line
+    fig = viz.plot_dot(
+        df,
+        x_col='category',
+        y_col='values',
+        add_hline_at=('Target', 50)
+    )
+
+For more examples and documentation:
+https://github.com/jpcurada/exploralytics
 """
 
 from .visualizer import Visualizer
-from .utils import check_data, get_number_columns, calc_subplot_size
+from .utils import (
+    identify_num_rows,
+    highlight_bars_colors,
+    add_footer
+)
 
 __all__ = [
+    # Main visualization class
     'Visualizer',
-    'check_data',
-    'get_number_columns',
-    'calc_subplot_size'
+
+    # Utility functions
+    'identify_num_rows',
+    'highlight_bars_colors',
+    'add_footer'
 ]
