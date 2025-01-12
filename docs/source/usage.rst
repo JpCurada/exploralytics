@@ -1,83 +1,106 @@
-Usage Guide
-==========
+Usage
+=====
 
-Basic Concepts
+Getting Started
 -------------
 
-The core of exploralytics is the ``Visualizer`` class, which provides methods for creating various types of plots.
+To use Exploralytics in a project::
 
-Initialization
+    from exploralytics import Visualizer
+
+Creating a Visualizer Instance
+---------------------------
+
+The Visualizer class is the main interface for creating plots. You can customize its appearance globally::
+
+    viz = Visualizer(
+        color="#94C973",           # Main color for plots
+        height=768,                # Plot height in pixels
+        width=1366,                # Plot width in pixels
+        template="simple_white",    # Plotly template
+        texts_font_style="Arial",   # Font family
+        title_bold=True            # Bold titles
+    )
+
+Customization Options
+-------------------
+
+Global Parameters
+~~~~~~~~~~~~~~~
+
+* ``color``: Main color for plot elements (default: "#94C973")
+* ``height``: Height of plots in pixels (default: 768)
+* ``width``: Width of plots in pixels (default: 1366)
+* ``template``: Plotly template name (default: "simple_white")
+* ``texts_font_style``: Font family for text elements
+* ``title_bold``: Whether to make titles bold (default: False)
+
+Plot-Specific Parameters
+~~~~~~~~~~~~~~~~~~~~~~
+
+Common parameters available for all plots:
+
+* ``title``: Main title of the plot
+* ``subtitle``: Subtitle shown below the main title
+* ``footer``: Optional footer text
+
+Additional parameters vary by plot type and are documented in the :ref:`examples` section.
+
+Working with Data
+---------------
+
+Exploralytics works with pandas DataFrames. Here's how to prepare your data::
+
+    import pandas as pd
+    
+    # Load your data
+    df = pd.read_csv('your_data.csv')
+    
+    # Create visualizations
+    viz.plot_histograms(df)
+    viz.plot_correlation_map(df)
+
+Best Practices
+------------
+
+1. Data Preparation
+~~~~~~~~~~~~~~~~~
+
+* Clean your data before visualization
+* Handle missing values appropriately
+* Ensure numerical columns are correctly typed
+
+2. Plot Customization
+~~~~~~~~~~~~~~~~~~~
+
+* Use consistent styling across related plots
+* Choose appropriate color schemes for your data
+* Add meaningful titles and subtitles
+
+3. Performance
+~~~~~~~~~~~~
+
+* For large datasets, consider using the ``top_n`` parameter
+* Use ``specific_cols`` to limit histogram generation
+* Be mindful of memory usage with large correlation matrices
+
+Troubleshooting
 -------------
 
-.. code-block:: python
+Common Issues
+~~~~~~~~~~~~
 
-   from exploralytics import Visualizer
+1. **Missing Data**::
 
-   # Create a visualizer with default settings
-   viz = Visualizer()
+    # Handle missing values before plotting
+    df = df.dropna()  # or df.fillna(value)
 
-   # Or customize the appearance
-   viz = Visualizer(
-       color="#2E75B6",      # Main color theme
-       height=400,           # Default plot height
-       width=800,           # Default plot width
-       title_bold=True,     # Bold titles
-       texts_font_style='Arial'  # Font family
-   )
+2. **Type Errors**::
 
-Creating Plots
--------------
+    # Ensure correct data types
+    df['numeric_column'] = pd.to_numeric(df['numeric_column'], errors='coerce')
 
-Histogram
-^^^^^^^^
+3. **Memory Issues**::
 
-.. code-block:: python
-
-   # Single histogram
-   fig = viz.plot_histogram(
-       df,
-       x_col='values',
-       title='Distribution',
-       show_mean=True,
-       show_median=True
-   )
-
-Bar Plot
-^^^^^^^
-
-.. code-block:: python
-
-   # Bar plot with highlighted values
-   fig = viz.plot_bar(
-       df,
-       x_col='category',
-       y_col='values',
-       highlight_top_n=(3, "green"),
-       highlight_low_n=(2, "red")
-   )
-
-Correlation Analysis
-^^^^^^^^^^^^^^^^^
-
-.. code-block:: python
-
-   # Correlation with target variable
-   fig = viz.plot_correlation_with_target(
-       df,
-       target_column='target',
-       title='Feature Correlations'
-   )
-
-Displaying Plots
---------------
-
-All plotting methods return a Plotly Figure object that can be:
-
-.. code-block:: python
-
-   # Displayed in a notebook
-   fig.show()
-
-   # Saved to a file
-   fig.write_html("plot.html")
-   fig.write_image("plot.png")
+    # Limit data size
+    df = df.head(1000)  # or use appropriate sampling
