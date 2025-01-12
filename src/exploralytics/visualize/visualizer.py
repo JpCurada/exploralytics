@@ -254,7 +254,7 @@ class Visualizer:
             Figure containing the correlation heatmap
         """
         # Calculate correlation matrix and round values to 2 decimal places
-        corr = df.corr().round(2)  
+        corr = df.select_dtypes(['int', 'float']).corr().round(2)  
         
         # Create mask for upper triangle to avoid redundant information
         mask = np.triu(np.ones_like(corr, dtype=bool))
@@ -351,6 +351,9 @@ class Visualizer:
         plotly.graph_objects.Figure
             Interactive bar chart showing correlation coefficients
         """
+        # Select numerical columns only
+        df = df.select_dtypes(['int', 'float'])
+
         # Calculate correlations with target and sort them
         correlations = df.corr()[target_column].sort_values()
         # Remove target column's correlation with itself (always 1)
