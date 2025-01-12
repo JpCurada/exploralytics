@@ -31,6 +31,7 @@ class Visualizer:
         Colorscale for the plot (default: px.colors.diverging.Earth)
     texts_font_style : str, optional
         Font style for text elements in the plot (default: None)
+
     title_bold : bool
         Flag to set the plot title in bold (default: False)
 
@@ -438,9 +439,9 @@ class Visualizer:
         add_hline : bool, optional
             Whether to add mean line (default: False)
         highlight_top_n : tuple, optional 
-            Tuple of (n, color) to highlight top n bars
+            Tuple of (n, hex color code) to highlight top n bars
         highlight_low_n : tuple, optional
-            Tuple of (n, color) to highlight bottom n bars
+            Tuple of (n, hex color code) to highlight bottom n bars
 
         Returns
         -------
