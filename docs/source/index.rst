@@ -1,7 +1,7 @@
-Welcome to exploralytics documentation!
-=====================================
+Welcome to Exploralytics's documentation!
+====================================
 
-A powerful toolkit for data exploration and visualization using Plotly.
+**Exploralytics** is a powerful data visualization library built on top of Plotly, designed to create beautiful, interactive visualizations with minimal code. It provides a consistent API and styling across different types of plots while maintaining full customization capabilities.
 
 .. image:: https://badge.fury.io/py/exploralytics.svg
     :target: https://badge.fury.io/py/exploralytics
@@ -13,70 +13,53 @@ A powerful toolkit for data exploration and visualization using Plotly.
 
 Features
 --------
-* Interactive data visualization with Plotly backend
-* Consistent styling and modern design
-* Easy-to-use API for common visualization tasks
+
+* Easy-to-use interface for creating complex visualizations
+* Consistent styling and customization options
+* Interactive plots powered by Plotly
 * Support for various plot types:
-  - Histograms (single and multiple)
-  - Bar plots with customizable highlighting
-  - Correlation analysis plots
-  - Multi-subplot layouts
+    * Histograms with distribution analysis
+    * Correlation matrices
+    * Feature correlation analysis
+    * Horizontal bar plots
+    * Dot plots with reference lines
 
-Quick Start
------------
+Getting Started
+--------------
 
-Installation
-^^^^^^^^^^^
-
-.. code-block:: bash
-
-   pip install exploralytics
-
-Basic Usage
-^^^^^^^^^^
-
-.. code-block:: python
-
-   from exploralytics import Visualizer
-
-   # Initialize the visualizer
-   viz = Visualizer(
-       color="#2E75B6",
-       height=400,
-       width=800,
-       title_bold=True
-   )
-
-   # Create a simple histogram
-   fig = viz.plot_histogram(
-       df,
-       x_col='values',
-       title='Distribution of Values'
-   )
-
-   # Display the plot
-   fig.show()
+To get started with Exploralytics, check out the following sections:
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide
+   :caption: Contents:
 
    installation
    usage
-   visualization
    examples
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API Reference
+Quick Example
+------------
 
-   api
+Here's a quick example of using Exploralytics::
 
-Links
------
-* `PyPI Package <https://pypi.org/project/exploralytics/>`_
-* `Source Code <https://github.com/jpcurada/exploralytics>`_
-* `Issue Tracker <https://github.com/jpcurada/exploralytics/issues>`_
+    from exploralytics import Visualizer
+    import pandas as pd
+
+    # Initialize the visualizer
+    viz = Visualizer()
+
+    # Create a simple histogram
+    viz.plot_histograms(
+        df,
+        title='Data Distribution',
+        show_mean=True,
+        show_median=True
+    )
+
+Contributing
+-----------
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 Indices and tables
 ==================
